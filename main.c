@@ -210,8 +210,8 @@ void wifi_AP_init(void)
 
    /*wifi_config_t sta_config = {
         .sta = {
-            .ssid = "BR_main_2_kueche",
-            .password = "der_meister_von_24a",
+            .ssid = "SSID",
+            .password = "PASSWORD",
             .bssid_set = false
         }
     };
