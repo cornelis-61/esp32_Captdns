@@ -2,7 +2,7 @@
 A small example how to setup a WEB-Server with Captdns capability.
 
 I setup this code by using existing code and modify it, so it can be easily copied
-into the official Toolchain of Esperrif in the Version esp-idf-v2.0-rc1.
+into the official Toolchain of Espressif in the Version esp-idf-v2.0-rc1.
 
 I started this project with a post in esp32.com 
 
