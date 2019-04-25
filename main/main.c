@@ -44,22 +44,10 @@ const int CONNECTED_BIT = BIT0;
 
 char* json_unformatted;
 
-const static char http_html_hdr[] =
-    "HTTP/1.1 200 OK\r\nContent-type: text/html\r\n\r\n";
-const static char http_index_hml[] = "<!DOCTYPE html>"
-      "<html>\n"
-      "<head>\n"
-      "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
-      "  <style type=\"text/css\">\n"
-      "    html, body, iframe { margin: 0; padding: 0; height: 100%; }\n"
-      "    iframe { display: block; width: 100%; border: none; }\n"
-      "  </style>\n"
-      "<title>HELLO ESP32</title>\n"
-      "</head>\n"
-      "<body>\n"
-      "<h1>Hello World, from ESP32!</h1>\n"
-      "</body>\n"
-      "</html>\n";
+const uint8_t indexWebpageStart[] asm("_binary_index_html_start");
+const uint8_t indexWebpageEnd[] asm("_binary_index_html_end");
+
+const static char http_html_hdr[] = "HTTP/1.1 200 OK\r\nContent-type: text/html\r\n\r\n";
 
 
 static esp_err_t event_handler(void *ctx, system_event_t *event)
@@ -90,8 +78,7 @@ static esp_err_t event_handler(void *ctx, system_event_t *event)
     return ESP_OK;
 }
 
-static void
-http_server_netconn_serve(struct netconn *conn)
+static void http_server_netconn_serve(struct netconn *conn)
 {
   struct netbuf *inbuf;
   char *buf;
@@ -127,18 +114,18 @@ http_server_netconn_serve(struct netconn *conn)
       if(buf[5]=='h') {
         gpio_set_level(LED_BUILTIN, 0);
         /* Send our HTML page */
-        netconn_write(conn, http_index_hml, sizeof(http_index_hml)-1, NETCONN_NOCOPY);
+        netconn_write(conn, indexWebpageStart, strlen((char *)indexWebpageStart)-1, NETCONN_NOCOPY);
       }
       else if(buf[5]=='l') {
         gpio_set_level(LED_BUILTIN, 1);
         /* Send our HTML page */
-        netconn_write(conn, http_index_hml, sizeof(http_index_hml)-1, NETCONN_NOCOPY);
+        netconn_write(conn, indexWebpageStart, strlen((char *)indexWebpageStart)-1, NETCONN_NOCOPY);
       }
       else if(buf[5]=='j') {
         netconn_write(conn, json_unformatted, strlen(json_unformatted), NETCONN_NOCOPY);
       }
       else {
-          netconn_write(conn, http_index_hml, sizeof(http_index_hml)-1, NETCONN_NOCOPY);
+          netconn_write(conn, indexWebpageStart, strlen((char *)indexWebpageStart)-1, NETCONN_NOCOPY);
       }
     }
 
