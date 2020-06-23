@@ -203,8 +203,7 @@ void wifi_AP_init(void)
  
    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
    
-   ESP_ERROR_CHECK( esp_wifi_init(&cfg) );
-   ESP_ERROR_CHECK( esp_wifi_set_country(WIFI_COUNTRY_EU) ); 
+   ESP_ERROR_CHECK( esp_wifi_init(&cfg) ); 
    ESP_ERROR_CHECK( esp_wifi_set_storage(WIFI_STORAGE_RAM) );
    ESP_ERROR_CHECK( esp_wifi_set_mode(WIFI_MODE_AP) ); // APSTA) );
 

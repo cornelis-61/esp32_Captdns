@@ -1,0 +1,23 @@
+menu "MY PROJECT configuration"
+
+config MY_LED_ON_DEVBOARD_GPIO_NUM
+    int "LED on-board GPIO# (Huzzah32 #13) (Lolin32lite #22)"
+	default 13
+
+config MY_LED_ON_DEVBOARD_WIRING_TYPE
+    int "LED on-board wiring type (Huzzah32 1=GND) (Lolin32lite 2=VCC)"
+	default 1
+
+config MY_GPS_UART_NUM
+    int "MY_GPS_UART_NUM (1,2)"
+    default 1
+
+config MY_GPS_UART_RX_GPIO_NUM
+    int "MY_GPS_UART_RX_GPIO_NUM ((Huzzah32 pin 23 @ bottomright))"
+    default 23
+    
+config MY_GPS_UART_TX_GPIO_NUM
+    int "MY_GPS_UART_TX_GPIO_NUM ((Huzzah32 pin 22 @ bottomright-1))"
+    default 22
+    
+endmenu
