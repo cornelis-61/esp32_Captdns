@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>Hello world, this is ESP32!</h1>
+<p>Feel free to click the button.</p>
+<button id="myButton" class="button" onclick="myFunction()">Green Button</button>
+<style>
+	.button {
+  		background-color: green;
+		border-radius: 10px; 
+		border: none;
+  		color: black;
+	}
+	.button2 {
+  		background-color: red;
+		border-radius: 10px; 
+		border: none;
+  		color: black;
+	}
+</style>
+<script>
+        function myFunction() {
+                var x = document.getElementById("myButton");
+		if(x.className=="button")   { x.className="button2"; x.innerHTML="Red Button"; } else
+		if(x.className=="button2")  { x.className="button";  x.innerHTML="Green Button"; }               
+        }
+</script>
+</body>
+</html>

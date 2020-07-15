@@ -1,20 +1,6 @@
 # esp32_Captdns
 A small example how to setup a WEB-Server with Captdns capability.
 
-I setup this code by using existing code and modify it, so it can be easily copied
-into the official Toolchain of Espressif in the Version esp-idf-v2.0-rc1.
-
-I started this project with a post in esp32.com 
-
-ESP32 as stanalone Webserver
-
-Where stanalone a writing error is it should be Standalone ;)
-
-I want to thank the guys who gave me some hints to move on as quick as possible.
-
-Kolban, WiFive and andrew_p
-
-Some of the the posts asked for a Github repository , well I never did that and this is good
-opportunity to start doing it.
-
-I hope someone likes it and can use it for educational purpose.
+## History
+The original code was written by cornelis-61, based on Espressif's esp-idf-v2.0-rc1 from 2017. 
+smnd96 corrected the file structure in 2020 for use in the context of esp-idf-v4.0.
