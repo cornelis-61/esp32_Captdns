@@ -12,5 +12,5 @@ include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 #execute_process(COMMAND doxygen Doxyfile)
 
 
-project(GPS)
+project(Captdns)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
