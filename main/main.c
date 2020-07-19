@@ -48,7 +48,7 @@ const bool embedIndexHTML = true;
 const static char http_index_hml[] = "<!DOCTYPE html>"
     "<html>\n"
     "<body>\n"
-    "<h1>Hello world, this is ESP32!</h1>\n"
+    "<h1>Hello world, this is " CONFIG_IDF_TARGET "!</h1>\n"
     "<p>Feel free to click the button.</p>\n"
     "<button id=\"myButton\" class=\"button\" onclick=\"myFunction()\">Green Button</button>\n"
     "<style>\n"
