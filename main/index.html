@@ -3,7 +3,20 @@
 <body>
 <h1>Hello world, this is ESP32!</h1>
 <p>Feel free to click the button.</p>
-<button id="myButton" class="button" onclick="myFunction()">Green Button</button>
+<a id="myEffect" href="/?state=unknown">
+<button id="myButton" class="button">Green Button</button>
+</a>
+
+<script>
+    var x = document.getElementById("myButton");
+    var y = document.getElementById("myEffect");
+    var z = window.location.href;
+    var regex = new RegExp('[?]state=green');
+    x.innerHTML=regex.exec(z);
+	if(regex.exec(z)=="?state=green") { x.className="button";  x.innerHTML="Green Button"; y.setAttribute('href','/?state=red');  } else
+    if(regex.exec(z)!="?state=green") { x.className="button2"; x.innerHTML="Red Button"; y.setAttribute('href','/?state=green');  }
+</script>
+
 <style>
 	.button {
   		background-color: green;
@@ -18,12 +31,5 @@
   		color: black;
 	}
 </style>
-<script>
-        function myFunction() {
-                var x = document.getElementById("myButton");
-		if(x.className=="button")   { x.className="button2"; x.innerHTML="Red Button"; } else
-		if(x.className=="button2")  { x.className="button";  x.innerHTML="Green Button"; }               
-        }
-</script>
 </body>
 </html>
