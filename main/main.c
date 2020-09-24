@@ -30,7 +30,7 @@
 #include "tcpip_adapter.h"
 #include "lwip/dns.h"
 
-#define LED_GPIO_PIN GPIO_NUM_4
+#define LED_GPIO_PIN GPIO_NUM_21
 #define LED_BUILTIN 16
 #define delay(ms) (vTaskDelay(ms/portTICK_RATE_MS))
 
@@ -149,7 +149,7 @@ static void http_server_netconn_serve(struct netconn *conn)
         }
         if(buflen>=14 && buf[12]=='r') {
             printf("Query = RED\n");
-            gpio_set_level(LED_GPIO_PIN, 1);
+            gpio_set_level(LED_GPIO_PIN, 0);
         }
        }
  
