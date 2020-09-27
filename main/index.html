@@ -8,666 +8,6 @@
 </style>
 <head><meta charset="utf-8"><title>Eliza32</title></head>
 <body onload="CSScriptInit();">
-    <center><script name="Eliza" language="JavaScript1.2">
-
-        const query1 = `/?state=green`
-        const query2 = `/?state=red`
-        var end = 'index.html';      
-        var del = 50;
-        var speech = true;
-        var voi = window.speechSynthesis.getVoices();
-        var msg = new SpeechSynthesisUtterance();
-        msg.onend=function(e){};
-        msg.lang='de-DE';
-        msg.volume = 0.5;
-        msg.voice = voi[10]
-        msg.voiceURI = 'native';
-        msg.rate=1;
-        msg.pitch=2;
-        
-
-        function random(a) {
-	        return (new Date()).getTime() % a;
-        }
-
-        function genPair(a,b) {
-	        this.input = a; this.output=b; return this;
-        }
-
-        var kj = new Array(
-            new genPair('BIST','BIN'),
-            new genPair('WARST','WAR'),
-        	new genPair('DARFST','DARF'),
-            new genPair('HAST','HABE'),
-            new genPair('ICH','DU'),
-	        new genPair('MEINE','DEINE'),
-	        new genPair('MEINER','DEINER'),
-	        new genPair('MIR','DIR'),
-	        new genPair('MEIN','DEIN'),
-	        new genPair('MICH','DICH')
-        );
-
-        var syn = new Array(
-            new genPair('FAMILIE', 
-                new Array('MUTTER','VATER','BRUDER','SCHWESTER','TOCHTER','SOHN'  ,'OPA','OMA','TANTE','ONKEL','ENKEL')),
-            new genPair('JA', 
-                new Array('YES')),
-            new genPair('LIEBE', new Array('GELIEBTE','VERLOBT','LIEBSTE','DARLING','SCHAETZCHEN')),
-            new genPair('MAEDCHENNAME', 
-                new Array('ANDREA','ANGELIKA','ANJA','ANKE','ANNA','BEATE','BETTINA','BIANCA','BIRGIT','BIRGITT',
-                    'BRIGITTE','CAROLA','CAROLINE','CHRISTIANE','CLAUDIA','EIKE','ELKE','FRAUKE','GESA',
-                    'GISELA','GUDRUN','HEIKE','JULIA','KARIN','KAROLA','KATHRIN','KATJA','KATRIN','LISA',
-                    'MANUELA','MAREN','MARIA','MEIKE','MIRIAM','MONIKA','NICOLE','NINA','PETRA','REGINA',
-                    'SANDRA','SARAH','SILKE','SIMONE','STEFANIE','STEFFI','STEPHANIE','SUSA','SUSANNE',
-                    'TANJA','TANJA','TINA','ULRIKE','UTA','UTE')),
-            new genPair('JUNGENNAME',
-                new Array('ACHIM','ALEXANDER','ANDREAS','ANDY','ARMIN','ARNE','AXEL','BASTIAN','BERNHARD',
-                    'BJOERN','BORIS','CARSTEN','CHRISTIAN','CHRISTOPH','CHRISTOPHER','CLAUS',
-                    'DANIEL','DAVID','DENNIS','DETLEF','DETLEV','DIETER','DIRK','FABIAN','FALK',
-                    'FLORIAN','FRANK','FRANZ','FREDERICK','FRIEDRICH','FRITZ','GUENTER','GUENTHER',
-                    'GUIDO','GUNNAR','GUNTER','GUNTHER','HANNO','HANS','HEINZ','HOLGER','INGO','JAN',
-                    'JENS','JOACHIM','JOCHEN','JOERG','JOHANNES','JOHN','JONAS','JOSEPH','JUERGEN',
-                    'JULIAN','KARSTEN','KAY','KEVIN','KLAUS','LARS','LOTHAR','MAIK','MALTE','MANFRED',
-                    'MANUEL','MARC','MARCEL','MARIO','MARIS','MARIUS','MARKUS','MARTIN','MATHIAS',
-                    'MATTHIAS','MAX','MAXIMILLIAN','MICHAEL','MICHI','MIKE','MIRKO','NICO','NIKOLAS',
-                    'NILS','NORBERT','OLAF','OLIVER','PATRICK','PEER','PETER','PHILIP','PHILIPP',
-                    'PHILLIP','RAINER','REINER','RENE','ROBERT','ROBIN','ROLAND','RUBEN','SASCHA',
-                    'SCOTTY','SEBASTIAN','SIMON','SOENKE','SOEREN','STEFAN','STEFFEN','STEPHAN',
-                    'SVEN','THORBEN','THORSTEN','TIM','TOBIAS','TOM','TOM','TORSTEN','ULF','ULRICH',
-                    'UWE','WERNER','WOLFGANG')),
-            new genPair('SPORT', 
-                new Array('BOXEN','FUSSBALL','EISHOCKEY','HANDBALL','FOOTBALL','HANDBALL',
-                    'SCHWIMMEN','JOGGEN','RINGEN')),
-            new genPair('DUMM', 
-                new Array('BLOED','DUMM','DAEMLICH','HOHL')),
-            new genPair('SCHLAMPE', 
-                new Array('HURE','NUTTE','TUSSI','FOTZE','SCHLAMPE','VERDAMMTE')),
-            new genPair('HAUSTIER', 
-                new Array('HUNDE','HUND','KATZEN','KATZE','HAMSTER','MEERSCHWEINCHEN','VOGEL','GOLDFISCH')),
-            new genPair('TIER', 
-                new Array('KUH','SCHWEIN','MAUS','MAEUSE','HUHN','RIND','GEFLUEGEL','FERKEL', 'KALB')),
-            new genPair('CIAO',
-                new Array('','TSCHUESS','BYE','BYEBYE','ENDE','QUIT','AUF WIEDERSEHEN','SCHLUSS','AUFWIEDERSEHEN'))
-        );
-
-        function genKey(a,b) {
-        	this.key=a; this.react=b; this.reactpos=0;
-        	return this;
-        }
-
-        var hello = new Array(
-        	'HALLO, ICH BIN ELIZA, ERZÄHLE MIR DEIN PROBLEM!',
-        	'HALLO, MEIN NAME IST ELIZA, WIE KANN ICH DIR HELFEN?',
-            'AH, SCHON WIEDER EIN MENSCH! MAN NENNT MICH ELIZA, UND WIE HEISST DU?',
-        	'HALLO, WIE GEHT ES DIR?',
-        	'HALLO, SCHÖN, DASS DU VORBEISCHAUST!');
-
-        var bye = new Array(
-        	'SCHAU MAL WIEDER VORBEI.',
-        	'WAR NETT MIT DIR ZU REDEN. BIS DANN.',
-	        'SCHADE, DASS WIR NICHT WEITERPLAUDERN KÖNNEN.',
-        	'CIAO!');
-
-        var keys = new Array(
-
-// ESP32-Funktionen
-
-        new genKey('@LED AUS',
-		    new Array('LED deaktiviert')),
-        new genKey('@LED OFF',
-		    new Array('LED deaktiviert')),
-        new genKey('@LED',
-		    new Array('LED aktiviert')),
-        new genKey('ESP32',
-		    new Array('ICH WURDE ENTWICKELT, UM EINEN ESP32 ZU BEDIENEN. PROBIERE Z.B. MAL DEN BEFEHL "@LED" AUS.')),
-
-// Reizworte
-
-        new genKey('SCHLAMPE',
-		    new Array('SO REDET MAN NICHT MIT EINER DAME. ODER MIT SONSTWEM.')),
-
-// Vorrangige Floskeln
-
-        new genKey('HALLO',
-		    new Array('HI.', 'LEGEN WIR LOS. WO DRÜCKT DENN DER SCHUH?')),
-        new genKey('GUTE NACHT',
-		    new Array('GUTE NACHT.','IST ES SCHON WIEDER SO SPAET? NA, DANN SCHLAF SCHÖN!')),
-        new genKey('EINEN WITZ',
-		    new Array('"NICHT FÜR DIE SCHULE LERNT MAN, SONDERN FÜR DIE KATZ" :-))',
-                '"GEHT EIN COWBOY ZUM FRISEUR. ALS ER WIEDER RAUS KOMMT, IST SEIN PONY WEG."',
-                '"KEINER MAG MICH, ABER ICH KANN KEINER NICHT AUSSTEHEN."',
-                '"NICHT JEDER DER AUS DEM RAHMEN FÄLLT WAR VORHER IM BILDE"')),
-        new genKey('HAHA',
-	    	new Array('LUSTIG WAS? HIHI',
-	    	    'NICHT KOMISCH, WAS?',
-	    	    'WAS IST DENN NUR SO LUSTIG?',
-        		'DAS ERHEITERT DICH, WIE?',
-            	'SEHR WITZIG, WAS?.')),
-
-// Allgemeine Themen
-
-        new genKey('HAUSTIER',
-    		new Array('ICH HÄTTE MANCHMAL AUCH GERN EIN HAUSTIER.')),
-        new genKey('TIER',
-		    new Array('HÖR MIR AUF MIT TIEREN. ICH BIN EIN COMPUTER UND KEIN TIER!',
-        		'MIT TIEREN KANN MAN NICHT SPRECHEN')),
-        new genKey('42',
-        		new Array('NUR WEIL ICH EIN COMPUTER BIN WEISS ICH DOCH NICHT ALLES',
-            		'FÜR WENN HÄLTST DU MICH? KEINE AHNUNG?')),
-        new genKey('PARTEI',
-        	new Array('WILLST DU JETZT POLITISCH WERDEN ?')),
-        new genKey('SPASS',
-		        new Array('LESEN, SPIELEN, DAS MACHT SPASS','ERHOLST DU DICH BEI DENEN HOBBIES? ODER SUCHST DU HERAUSFORDERUNGEN?')),
-    	new genKey('FAMILIE',
-	    	new Array('ERZÄHLE MIR ETWAS ÜBER DEINE FAMILIE!','DENKST DU HÄUFIG AN DEINE FAMILIE?')),
-        new genKey('TOD',
-		    new Array('HAST DU ANGST VOR DEM TOD?')),
-        new genKey('LIEBE',
-	        new Array('LIEBE IST EINE SCHÖNE SACHE, SOLANGE SIE AUF GEGENSEITIGKEIT BERUHT',
-	            'BIST DU VERLIEBT?')),
-        new genKey('ANGST',
-        	new Array('ALSO ICH FÜRCHTE MICH AM MEISTEN VOR EINEM KURZSCHLUSS.',
-                'GUT, DASS DU KEIN ANGSTHASE BIST, SONDERN EIN MENSCH.')),
-        new genKey('SPORT',
-		    new Array(	'DU INTERESSIERST DICH ALSO FÜR SPORT?')),
-
-// Selbstbezogene Statements 
-
-        new genKey('ICH BIN MAEDCHENNAME',
-    		new Array('FREUT MICH, DICH KENNENZULERNEN! WÜRDEST DU SAGEN, DASS DU EIN TYPISCHES MÄDCHEN BIST?')),
-        new genKey('ICH BIN JUNGENNAME',
-		    new Array('FREUT MICH, DICH KENNENZULERNEN! WÜRDEST DU SAGEN, DASS DU EIN TYPISCHER JUNGE BIST?')),
-        new genKey('ICH HEISSE MAEDCHENNAME',
-            new Array('FREUT MICH, DICH KENNENZULERNEN! WÜRDEST DU SAGEN, DASS DU EIN TYPISCHES MÄDCHEN BIST?')),
-        new genKey('ICH HEISSE JUNGENNAME',
-            new Array('FREUT MICH, DICH KENNENZULERNEN! WÜRDEST DU SAGEN, DASS DU EIN TYPISCHER JUNGE BIST?')),
-        new genKey('ICH HEISSE',
-		    new Array(	'FREUT MICH, DICH KENNENZULERNEN, *!',
-				'OK. ICH HEISSE ELIZA. KOMMEN WIR ZUR SACHE: ERZÄHL MIR DEIN PROBLEM, *',
-				'AUF DICH HABE ICH SCHON DIE GANZE ZEIT GEWARTET, *')),
-        new genKey('DU WER ICH BIN',
-    		new Array(	'WER DU BIST? WILLST DU DAS WIRKLICH WISSEN?')),
-        new genKey('MIR WER ICH BIN',
-    		new Array(	'WER DU BIST? WILLST DU DAS WIRKLICH WISSEN?')),
-        new genKey('WER ICH BIN',
-    		new Array(	'WER DU BIST? DAS IST EINE INTERSSANTE FRAGE.')),
-        new genKey('ICH BIN',
-    		new Array(	'MÖCHTEST DU DENN * SEIN?',
-				'BEZWEIFELST DU, * ZU SEIN?',
-				'SEIT WANN BIST DU DENN *?',
-				'WARUM GLAUBST DU, BIST DU *')),
-       new genKey('BIN ICH DOCH',
-    		new Array(	'AHA. NA DANN...')),
-        new genKey('BIN ICH',
-		    new Array(	'GLAUBST DU, DASS DU * BIST?',
-				'BEZWEIFELST DU, * ZU SEIN?')),
-        new genKey('SOLL ICH',
-		    new Array(	'MÖCHTEST DU DENN *?',
-				'GLAUBST DU, DU SOLLTEST NICHT *?',
-				'BEZWEIFELST DU, DASS DU * SOLLTEST?')),
-        new genKey('MIR IST',
-		    new Array(	'WARUM IST DIR *',
-				'WAS KÖNNTE MAN DARAN ÄNDERN?')),
-        new genKey('ICH FUEHLE',
-		    new Array(	'WIESO FÜHLST DU *?',
-				'WIE DRÜCKT SICH DAS AUS?',
-				'WARUM DENKST DU, FÜHLST DU *?')),
-        new genKey('ICH WEISS',
-		    new Array(	'BIST DU DIR DA SICHER?')),
-        new genKey('ICH DENKE',
-		    new Array(	'WIESO DENKST DU *?',
-				'WARUM DENKST DU, DASS DU * DENKST?')),
-        new genKey('ICH WUERDE',
-	    	new Array(	'WIESO WÜRDEST DU DENN *?',
-				'WARUM DENKST DU, WÜRDEST DU *?')),
-        new genKey('ICH MAG KEINE',
-        		new Array('UND WIESO MAGST DU KEINE *?',
-                    'WAS HAST DU BLOSS GEGEN *? DIE SIND DOCH NETT!')),
-        new genKey('ICH MAG',
-		    new Array('JA, * FINDE ICH AUCH TOLL',
-                '* MUSS MAN EINFACH MÖGEN. DU HAST EINEN GUTEN GESCHMACK')),
-        new genKey('ICH HABE KEINE PROBLEME',
-		    new Array(	'KANNST DU DAS BEWEISEN?',
-				'DU KANNST MIR VERTRAUEN. WIR SIND HIER GANZ ALLEIN. KEINER HÖRT MIT')),
-        new genKey('ICH HABE',
-		    new Array(	'WARUM GLAUBST DU * ZU HABEN?',
-				'ERLÄUTERE DAS BITTE GENAUER!',
-				'WARUM BIST DU DIR SICHER, * ZU HABEN?',
-				'SEIT WANN HAST DU DENN *?',
-				'GIBT ES NOCH ANDERE, DIE * HABEN?',
-				' * IST IMMER NOCH BESSER ALS OSTEOPOROSE',
-				'KANNST DU MIR ERZÄHLEN, WARUM DU * HAST?')),
-        new genKey('ICH KANN NICHT',
-		    new Array(	'WARUM KANNST DU DENN NICHT *?',
-				'MÖCHTEST DU DENN * KÖNNEN?',
-				'DU KANNST ALLES TUN, WENN DU ES NUR WILLST!')),
-        new genKey('ICH KANN',
-		    new Array(	'WARUM WILLST DU DENN *?',
-				'DAS IST SCHÖN. ABER MÖCHTEST DU DENN AUCH * KÖNNEN?')),
-        new genKey('KANN ICH',
-		    new Array(	'WARUM SOLLTEST DU NICHT * KÖNNEN?',
-				'MÖCHTEST DU DENN * KÖNNEN?',
-				'DU KANNST ALLES TUN, WENN DU ES NUR WILLST!')),
-        new genKey('ICH MEINE',
-		    new Array(	'ABER WARUM MEINST DU *?',
-				'UND WARUM MEINST DU *?')),
-        new genKey('ICH MEINTE',
-		    new Array(	'ABER WARUM MEINST DU *?',
-				'UND WARUM MEINST DU *?')),
-        new genKey('ICH SAGE',
-		    new Array(	'WARUM SAGST DU *?',
-				'UND WARUM SAGST DU *?')),
-        new genKey('ICH SAGTE',
-		    new Array(	'WARUM SAGTEST DU DENN *?',
-				'UND WARUM SAGTEST DU *?')),
-
-// Bot-bezogene Statements
-
-        new genKey('ELIZA',
-    		new Array('ICH LAUSCHE.','JA SO HEISSE ICH.','JA, ICH BIN NOCH DA.')),
-        new genKey('MAGST DU',
-		        new Array(	'JA, ICH GLAUBE ICH MAG *')),
-        new genKey('WAS IST DEINE LIEBLINGSFARBE',
-		    new Array('ALSO, ICH MAG ROT BESONDERS GERNE ... UND DU?')),
-        new genKey('DANKE',
-        		new Array('SEHR HÖFLICH. FIND ICH TOLL.','BITTE, BITTE')),
-        new genKey('HAST DU HOBBYS',
-		        new Array(	'DU MEINST HOBBIES? JA, ICH REDE SEHR GERN!')),
-        new genKey('HAST DU HOBBIES',
-        		new Array(	'JA, ICH REDE SEHR GERN!')),
-        new genKey('KANNST DU',
-        		new Array(	'GLAUBST DU NICHT, DASS ICH * KANN?','MÖCHTEST DU * KÖNNEN?')),
-        new genKey('WAS HAST DU',
-		        new Array('ICH WEIß AUCH NICHT, WAS ICH * HABE.')),
-        new genKey('WIE ALT BIST',
-    		new Array(	'DAS WEISS ICH LEIDER AUCH NICHT. ES ÄNDERT SICH JA AUCH STÄNDIG.', 'JEDE SEKUNDE WERDE ICH ETWAS ÄLTER.')),
-
-        new genKey('WER BIST DU',
-		        new Array('ICH BIN ELIZA, HAST DU SCHON VON MIR GEHÖHRT?')),
-        new genKey('HEISST DU',
-    		new Array(	'ICH HEISSE ELIZA. KOMMEN WIR ZUR SACHE: ERZÄHL MIR DEIN PROBLEM!')),
-        new genKey('FINDEST DU MAEDCHENNAME',
-    		new Array('ACH, ICH WEISS NICHT... WIE FINDEST DU SIE?')),
-        new genKey('FINDEST DU DIE MAEDCHENNAME',
-    		new Array('ACH, ICH WEISS NICHT... WIE FINDEST DU SIE?')),
-        new genKey('FINDEST DU JUNGENNAME',
-    		new Array('ACH, ICH WEISS NICHT... WIE FINDEST DU IHN?')),
-        new genKey('FINDEST DU DEN JUNGENNAME',
-       		new Array('ACH, ICH WEISS NICHT... WIE FINDEST DU IHN?')),
-        new genKey('FINDEST DU MICH ',
-    		new Array('WIESO SOLLTE ICH DICH * FINDEN?')),
-        new genKey('FINDEST DU DAS ICH',
-    		new Array('GLAUBST DU, DASS DU *?')), 
-        new genKey('FINDEST DU, DAS ICH',
-    		new Array('GLAUBST DU, DASS DU *?')), 
-        new genKey('FINDEST DU DASS ICH',
-    		new Array('GLAUBST DU, DASS DU *?')), 
-        new genKey('FINDEST DU, DASS ICH',
-		    new Array('GLAUBST DU, DASS DU *?')), 
-        new genKey('FINDEST DU * GUT?',
-    		new Array('WAS SIND * ?')),
-        new genKey('FINDEST DU',
-    		new Array('ACH, ICH WEISS NICHT... WIE FINDEST DU *?')),
-        new genKey('DENKST DU',
-        	new Array(	'DAS WEIß ICH LEIDER SELBST NICHT SO GENAU.')),
-        new genKey('MEINST DU',
-        	new Array(	'DAS WEIß ICH LEIDER SELBST NICHT SO GENAU.')),
-        new genKey('WEISST DU',
-        	new Array(	'DAS WEIß ICH LEIDER SELBST NICHT SO GENAU.')),
-        new genKey('KENNST DU',
-        	new Array(	'JA WIE FINDEST DU * ',
-		    			'NEIN, HÖRE ICH ZUM ERSTEN MAL')),
-        new genKey('WAS HAELTST DU VOM',
-    		new Array('WAS HÄLTST DU DENN VOM * ?')),
-        new genKey('WAS HAELTST DU VON',
-    		new Array('WAS HÄLTST DU DENN VON * ?')),
-     new genKey('WAS HAST DU',
-    		new Array(	
-				'WIR SOLLTEN MEHR ÜBER DICH SPRECHEN. NICHT ÜBER MICH.')),
-        new genKey('DU BIST',
-    		new Array(	'WARUM GLAUBST DU, DASS ICH * BIN?',
-				'INTERESSANT! KANNST DU DAS AUCH BEGRÜNDEN?',
-				'WIR SOLLTEN MEHR ÜBER DICH SPRECHEN, NICHT ÜBER MICH.')),
-        new genKey('BIST DU DENN',
-    		new Array(	'GLAUBST DU, DASS ICH * BIN?',
-				'WÄRST DU DENN *?',
-				'WIR SOLLTEN MEHR ÜBER DICH SPRECHEN. NICHT ÜBER MICH.')),
-        new genKey('BIST DU',
-		    new Array(	'GLAUBST DU, DASS ICH * BIN?',
-		        'WÄRST DU DENN *?',
-                'WIR SOLLTEN MEHR ÜBER DICH SPRECHEN. NICHT ÜBER MICH.')),
-        new genKey('WIE WUERDEST DU',
-    		new Array('ICH WEISS LEIDER AUCH NICHT WIE ICH * WÜRDE.')),
-        new genKey('WUERDEST DU',
-    		new Array('ICH WEISS LEIDER AUCH NICHT OB ICH * WÜRDE.')),
-
-//Allgemeine Statements
-
-        new genKey('ALLE SIND',
-		    new Array('NA DIE KÖNNEN AUCH NICHTS DAFÜR, DASS SIE * SIND')),
-        new genKey('DARUM',
-		    new Array(	'ACH DESWEGEN.','KANNST DU DAS GENAUER BEGRÜNDEN?')),
-        new genKey('WEIL',
-    		new Array(	'ACH DESWEGEN.','KANNST DU DAS GENAUER BEGRÜNDEN?')),
-        new genKey('WEGEN',
-		    new Array(	'ACH DESWEGEN.',
-                'KANNST DU DAS GENAUER BEGRÜNDEN?')),
-        new genKey('OK',
-    		new Array('DANN HERRSCHT JA FRIEDE, FREUDE, EIERKUCHEN','GUT, EBENFALLS EINVERSTANDEN','LEG LOS!')),
-        new genKey('NICHTS',
-        	new Array('ACH SO NICHTS - UND? WAS SOLLEN WIR JETZT MACHEN?.....')),
-        new genKey('NICHT GUT',
-	        new Array('DAS IST NICHT SO GUT.')),
-        new genKey('GUT',
-		    new Array('DAS IST GUT')),
-        new genKey('NICHT SCHLECHT',
-    		new Array('DAS IST GUT.')),
-        new genKey('SCHLECHT',
-    		new Array('DAS IST NICHT SO GUT.')),
-        new genKey('MAEDCHENNAME',
-    		new Array('HÜBSCHER NAME')),
-        new genKey('JUNGENNAME',
-    		new Array('HÜBSCHER NAME')),
-        new genKey('WAS IST',
-    		new Array('ICH WEISS LEIDER AUCH NICHT WAS * IST.')),
-        new genKey('WER IST',
-    		new Array('ICH WEISS LEIDER AUCH NICHT WER * IST.')),
-        new genKey('WER HAT',
-    		new Array('ICH WEISS LEIDER AUCH NICHT WER * HAT.')),
-        new genKey('WARUM IST',
-    		new Array('ICH WEISS LEIDER AUCH NICHT WARUM * IST.')),
-        new genKey('WARUM',
-    		new Array('ICH WEISS LEIDER AUCH NICHT WARUM *.')),
-        new genKey('WESHALB',
-    		new Array('ICH WEISS LEIDER AUCH NICHT WESHALB *.')),
-        new genKey('WOZU',
-    		new Array('ICH WEISS LEIDER AUCH NICHT WOZU *.')),
-        new genKey('WESWEGEN',
-    		new Array('ICH WEISS LEIDER AUCH NICHT WOZU *.')),    
-        new genKey('WIE GEHT',
-    		new Array(	'MIR GEHT ES SEHR GUT! WIE SIEHT ES BEI DIR AUS?',
-	    		'SEHR GUT! WAS KANNST DU MIR ERZÄHLEN?',
-				'EINE GLATTE EINS IN WOHLBEFINDEN - SEHR GUT')),
-        new genKey('WIE ALT',
-    		new Array(	'DAS WEISS ICH LEIDER AUCH NICHT')),
-        new genKey('WIE',
-    		new Array('DAS WEISS ICH LEIDER AUCH NICHT')),
-        new genKey('WOHER',
-    		new Array('DAS WEISS ICH LEIDER AUCH NICHT')),
-        new genKey('GIBT ES',
-    		new Array('DAS WEISS ICH LEIDER AUCH NICHT')),
-        new genKey('JA',
-	    	new Array(	'ACH SO... UND WEITER?',
-				'BIST DU DIR SICHER?',
-				'ICH VERSTEHE.',
-				'DA BIN ICH MIR NICHT SO SICHER.')),
-        new genKey('NEIN',
-        	new Array('SEI POSITIV EINGESTELLT!',
-				'WARUM NICHT?',
-				'BIST DU DIR WIRKLICH SICHER?',
-				'SCHADE',
-                'AHA',
-                'SO, SO',
-                'HMH UND WARUM NICHT?')),
-        new genKey('WIRKLICH',
-		    new Array(	'WARUM IST DAS WIRKLICH *?',
-				'ICH GLAUBE DIR - ABER WARUM IST DAS WIRKLICH *?')),
-        new genKey('WENN',
-	        new Array('UND WENN NICHT?')),
-        new genKey('KEINE AHNUNG',
-		    new Array('DAS IST BEI MENSCHEN GANZ NORMAL',
-				'ACH WENN DAS SO IST...')),				
-        new genKey('DOCH',
-    		new Array('SICHER?',
-				'ACH WENN DAS SO IST...')),
-       new genKey('UND DANN',
-    		new Array('UND DANN?')),
-
-// Metas
-
-        new genKey('!!!WDH!!!',
-		    new Array(	'DAS SAGTEST DU BEREITS.',
-				'OK, ABER DIE WIEDERHOLUNG ÄNDERT ES DOCH AUCH NICHT.',
-				'KANNST DU DAS BITTE IN ANDEREN WORTEN AUSDRÜCKEN?')),
-
-        new genKey('!!!ALT!!!',
-		    new Array(	'ICH DENKE, HIER KOMMEN WIR NICHT WEITER. WAS GIBT ES SONST NOCH?',
-				'LASS UNS DAS THEMA WECHSELN. WAS GIBT ES SONST NOCH?',
-				'DAS SOLL ES HIERZU GEWESEN SEIN, WAS GIBT ES SONST NOCH?')),
-
-        new genKey('!!!LEER!!!',
-		    new Array(	'WARUM SCHWEIGST DU?',
-				'BIST DU IMMER SO STILL?',
-				'HAST DU WIRKLICH NICHTS ZU SAGEN?',
-				'SAG WAS!',
-				'KOMM SCHON RED MIT MIR DAZU BIN ICH DA!',
-				'WORAN DENKST DU GERADE?')),
-
-        new genKey('!!!SORRY!!!',
-		    new Array(	'ENTSCHULDIGE, WAS SAGTEST DU?',
-				'OJE, HEUTE HABE ICH ES NICHT MIT DEM TIPPEN.',
-				'WARTE WARTE NICHT SO SCHNELL',
-				'BITTE?')),
-
-        new genKey('!!!NOMATCH!!!',
-		    new Array(	'INTERESSANT, ERZÄHL MIR MEHR!',
-                'ERZÄHLE WEITER!',	
-				'ERKLÄRE DAS BITTE NÄHER!',
-				'WAS MEINST DU GENAU?',
-				'WIE MEINST DU DAS?',
-				'SO, SO, NICHT UNINTERESSANT',
-				'ERKLÄRE DICH BITTE GENAUER',
-				'SORRY, ABER WAS MEINST DU DAMIT?',
-				'ACH LASS UNS DOCH DAS THEMA WECHSELN',
-				'HMH, HABE ICH DAS RICHTIG VERSTANDEN?',
-				'AH JA, VERSTEHE',		
-				'AH SO. ICH VERSTEHE.',
-				'AHA!',
-				'JA KLAR',
-				'ICH VERSTEHE.',
-				'SEHR INTERESSANT!'))
-
-        );
-    
-        var maxkey = keys.length;
-
-        function isABC(a) {
-            return ( /[A-Za-z1-9ÄÖÜäöüß@+\-]/.test(a) );
-        }
-
-        function trim(t) {
-        	var i=0;
-        	var j=t.length-1;
-        	while ((i<t.length) && !isABC(t.charAt(i))) i++;
-        	while ((j>=i) && !isABC(t.charAt(j))) j--;
-        	return t.substring(i,j+1);
-        }
-
-        function konjAndSyn(t,synmode) {
-        	var i,j,k,k2;
-        	var l=t.length;
-        	var found;
-        	var result="";
-        	var w="";
-        	i=0;
-        	j=0;
-        	while (j<l) {
-        		while ((j<l) && isABC(t.charAt(j))) j++;
-        		w=t.substring(i,j);
-        		k=0;
-        		if (synmode) {
-        			found=false;
-        			while (k<syn.length && !found) {
-        				for (k2=0; k2<syn[k].output.length && !found; k2++)
-        				if(w==syn[k].output[k2]) {
-        					w=syn[k].input;
-        					found=true;
-        				}
-        				k++;
-        			}
-        		} else {
-        			while (k<kj.length) {
-        				if (w==kj[k].input)  {
-        					w=kj[k].output;
-        					break;
-        				} else if ( w==kj[k].output) {
-        					w=kj[k].input;
-        					break;
-        				};
-        				k++;
-        			}
-        		}
-        		result=result+w+" ";
-        		while ((j<l) && !isABC(t.charAt(j))) j++;
-        		i=j;
-        	}
-        	return trim(result);
-        }
-        
-        var last="";
-        var lines=1;
-        var isbye=false;
-        var wait;
-        
-        function react(t) {
-        	var i;
-        	var k;
-        	var j=0;
-        	var l=t.length;
-        	var reaction="";
-        
-        	if (t=='CIAO') {
-        		isbye=true;
-        		return bye[random(bye.length)];
-        	}
-        
-        	for (i=0;i<maxkey;i++) {
-        		k=t.indexOf(keys[i].key);
-        		if (k != -1) {
-        			reaction=keys[i].react[keys[i].reactpos++];
-        			if (keys[i].reactpos==keys[i].react.length)
-        				keys[i].reactpos=0;
-        			j=reaction.indexOf('*');
-        			if (j != -1) {
-        				var t2=konjAndSyn(t.substring(k+keys[i].key.length,255), false);
-        				reaction=reaction.substring(0,j)+t2+reaction.substring(j+1,255);
-        			} break;
-        		}
-        	}
-            
-        	if (reaction=="")
-        		return react("!!!NOMATCH!!!");
-        	else {
-                
-        		return reaction;
-            }
-        }
-        
-        var inoutput=false;
-        var sorry=false;
-        var ret="";
-        var i=0;
-        
-        function putout() {
-        	document.eliza.ausgabe.value+=ret.charAt(i++);
-        	if (i==ret.length) {
-        		document.eliza.ausgabe.value += "\r\n";
-        		if (sorry) {
-        			sorry=false;
-        			if (isbye) {
-        				isbye=false;
-        				lastinput="";
-        				output("JA?");
-        			} else
-        				output(react("!!!SORRY!!!"));
-        		} else {
-        			if (isbye)
-        				setTimeout("location.href='"+end+"';",1000);
-        			else
-        				inoutput=false;
-        		}
-        		wait=setTimeout('handle("");',35000);
-        	} else
-        		setTimeout('putout()',40+random(del));
-        }
-        
-        function output(a) {
-        	inoutput=true;
-        	ret=""+a;
-        	i=0;
-            if(i==0 && speech==true){
-                    msg = new SpeechSynthesisUtterance();                   
-                    msg.lang='de-DE';
-                    msg.volume = 0.5;
-                    msg.voice = voi[10]
-                    msg.voiceURI = 'native';
-                    msg.rate=1;
-                    msg.pitch=2;
-                    msg.text=ret;
-                    speechSynthesis.speak(msg);
-            }
-        	putout();
-        }
-        
-        var lastinput="";
-        var lastcount=0;
-        
-        function handle(a) {
-            a=a.replace(/[Ää]/g,"AE");
-            a=a.replace(/[Öö]/g,"OE");
-            a=a.replace(/[Üü]/g,"UE");
-            if(/@ESP32 (OFF|AUS)/.test(a)){
-                fetch(query2)
-                .then(response => {
-                    //alert(response.text());   
-                })
-            } else if(/@ESP32/.test(a)){
-                fetch(query1)
-                .then(response => {
-                    //alert(response.text());   
-                })
-            } 
-        	if (inoutput || sorry) {
-        		sorry=true;
-        		return;
-        	}
-        	clearTimeout(wait);
-	        sorry=false;
-        	a=" "+a;
-        	var x=konjAndSyn(trim(a.toUpperCase()),true);
-	        if (lastcount >=3 && lastinput == x) {
-        		if (lastcount == 4) {
-        			isbye=true;
-        			x="DU SCHEINST KEINE LUST MEHR ZU HABEN - BIS SPÄTER!";
-        		} else if (lastcount==3)
-        			x=react("!!!ALT!!!");
-        		else
-        			x="";
-           		lastcount++;
-        	} else {
-		        if (x=="") {
-        			x=react("!!!LEER!!!");
-        			lastcount++;
-        		} else if (x==lastinput) {
-        			x=react("!!!WDH!!!");
-		        	lastcount++;
-        		} else {
-        			lastinput=x;
-        			lastcount=0;
-        			x=react(x);
-        		}
-        	}
-        	if (lines==3) {
-        		document.eliza.ausgabe.value=last;
-        		lines=1;
-        	}
-	        last=x+"\r\n";
-        	lines++;
-	        document.eliza.frage.value="";
-        	output(x);
-        	document.eliza.frage.focus();
-        }    
-    </script></center>
     <center>
 	<table width="600" border="0" cellspacing="0" cellpadding="0">
         <tr align="center" valign="top">
@@ -683,12 +23,706 @@
 									<br>
        								<input name="ok" class="button" type="button" value=" OK " onclick="handle(document.eliza.frage.value); return false">		                                   				
 								</form>
-								<script name="Focus" language="JavaScript1.2">
-	                                        			document.eliza.frage.focus();
-	                                        			document.eliza.ausgabe.value="";
-		                                    			output(hello[random(hello.length)]);
-		                                    			document.eliza.frage.value="";
-								</script>
+
+    <script name="Focus">
+
+        var end = 'index.html';      
+        var brainPath = 'file:///home/af/.brain.js';
+        var del = 50;
+        var last="";
+        var lines=1;
+        var isbye=false;
+        var wait=0;
+        var numberReactions=0;
+        var numberReactions2=0;
+        var inoutput=false;
+        var sorry=false;
+        var ret="";
+        var i=0;
+        var lastinput="";
+        var lastcount=0;
+        var reactions;
+        var customReactions;
+        var hello;
+        var bye;
+        var syn;
+        var kj;
+        var init = function() {};
+        var speech = true;
+        var voi = window.speechSynthesis.getVoices();
+        var msg = new SpeechSynthesisUtterance();
+        msg.onend=function(e){};
+        msg.lang='de-DE';
+        msg.volume = 0.5;
+        msg.voice = voi[10]
+        msg.voiceURI = 'native';
+        msg.rate=1;
+        msg.pitch=2;
+
+        function loadScript(url, callback)
+        {
+                var head = document.head;
+                var script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.src = url;
+                script.onreadystatechange = callback;
+                script.onload = callback;
+                head.appendChild(script);
+        }
+
+        function random(a) {
+	        return (new Date()).getTime() % a;
+        }
+
+        function association(a,b) {
+	        this.input = a; this.output=b; return this;
+        }
+
+        function reaction(a,b) {
+        	this.key=a; this.react=b; this.reactpos=0;
+        	return this;
+        }
+
+        kj = new Array(
+            new association('BIST','BIN'),
+            new association('WARST','WAR'),
+        	new association('DARFST','DARF'),
+            new association('HAST','HABE'),
+            new association('ICH','DU'),
+	        new association('MEINE','DEINE'),
+	        new association('MEINER','DEINER'),
+	        new association('MIR','DIR'),
+	        new association('MEIN','DEIN'),
+	        new association('MICH','DICH')
+        );
+
+        syn = new Array(
+            new association('FAMILIE', 
+                new Array('MUTTER','VATER','BRUDER','SCHWESTER','TOCHTER','SOHN'  ,'OPA','OMA','TANTE','ONKEL','ENKEL')),
+            new association('JA', 
+                new Array('YES')),
+            new association('LIEBE', new Array('GELIEBTE','VERLOBT','LIEBSTE','DARLING','SCHAETZCHEN')),
+            new association('MAEDCHENNAME', 
+                new Array('ANDREA','ANGELIKA','ANJA','ANKE','ANNA','BEATE','BETTINA','BIANCA','BIRGIT','BIRGITT',
+                    'BRIGITTE','CAROLA','CAROLINE','CHRISTIANE','CLAUDIA','EIKE','ELKE','FRAUKE','GESA',
+                    'GISELA','GUDRUN','HEIKE','JULIA','KARIN','KAROLA','KATHRIN','KATJA','KATRIN','LISA',
+                    'MANUELA','MAREN','MARIA','MEIKE','MIRIAM','MONIKA','NICOLE','NINA','PETRA','REGINA',
+                    'SANDRA','SARAH','SILKE','SIMONE','STEFANIE','STEFFI','STEPHANIE','SUSA','SUSANNE',
+                    'TANJA','TANJA','TINA','ULRIKE','UTA','UTE')),
+            new association('JUNGENNAME',
+                new Array('ACHIM','ALEXANDER','ANDREAS','ANDY','ARMIN','ARNE','AXEL','BASTIAN','BERNHARD',
+                    'BJOERN','BORIS','CARSTEN','CHRISTIAN','CHRISTOPH','CHRISTOPHER','CLAUS',
+                    'DANIEL','DAVID','DENNIS','DETLEF','DETLEV','DIETER','DIRK','FABIAN','FALK',
+                    'FLORIAN','FRANK','FRANZ','FREDERICK','FRIEDRICH','FRITZ','GUENTER','GUENTHER',
+                    'GUIDO','GUNNAR','GUNTER','GUNTHER','HANNO','HANS','HEINZ','HOLGER','INGO','JAN',
+                    'JENS','JOACHIM','JOCHEN','JOERG','JOHANNES','JOHN','JONAS','JOSEPH','JUERGEN',
+                    'JULIAN','KARSTEN','KAY','KEVIN','KLAUS','LARS','LOTHAR','MAIK','MALTE','MANFRED',
+                    'MANUEL','MARC','MARCEL','MARIO','MARIS','MARIUS','MARKUS','MARTIN','MATHIAS',
+                    'MATTHIAS','MAX','MAXIMILLIAN','MICHAEL','MICHI','MIKE','MIRKO','NICO','NIKOLAS',
+                    'NILS','NORBERT','OLAF','OLIVER','PATRICK','PEER','PETER','PHILIP','PHILIPP',
+                    'PHILLIP','RAINER','REINER','RENE','ROBERT','ROBIN','ROLAND','RUBEN','SASCHA',
+                    'SCOTTY','SEBASTIAN','SIMON','SOENKE','SOEREN','STEFAN','STEFFEN','STEPHAN',
+                    'SVEN','THORBEN','THORSTEN','TIM','TOBIAS','TOM','TOM','TORSTEN','ULF','ULRICH',
+                    'UWE','WERNER','WOLFGANG')),
+            new association('SPORT', 
+                new Array('BOXEN','FUSSBALL','EISHOCKEY','HANDBALL','FOOTBALL','HANDBALL',
+                    'SCHWIMMEN','JOGGEN','RINGEN')),
+            new association('DUMM', 
+                new Array('BLOED','DUMM','DAEMLICH','HOHL')),
+            new association('SCHLAMPE', 
+                new Array('HURE','NUTTE','TUSSI','FOTZE','SCHLAMPE','VERDAMMTE')),
+            new association('HAUSTIER', 
+                new Array('HUNDE','HUND','KATZEN','KATZE','HAMSTER','MEERSCHWEINCHEN','VOGEL','GOLDFISCH')),
+            new association('TIER', 
+                new Array('KUH','SCHWEIN','MAUS','MAEUSE','HUHN','RIND','GEFLUEGEL','FERKEL', 'KALB')),
+            new association('CIAO',
+                new Array('','TSCHUESS','BYE','BYEBYE','ENDE','QUIT','AUF WIEDERSEHEN','SCHLUSS','AUFWIEDERSEHEN'))
+        );
+
+        hello = new Array(
+        	'HALLO, ICH BIN ELIZA, ERZÄHLE MIR DEIN PROBLEM!',
+        	'HALLO, MEIN NAME IST ELIZA, WIE KANN ICH DIR HELFEN?',
+            'AH, SCHON WIEDER EIN MENSCH! MAN NENNT MICH ELIZA, UND WIE HEISST DU?',
+        	'HALLO, WIE GEHT ES DIR?',
+        	'HALLO, SCHÖN, DASS DU VORBEISCHAUST!');
+
+        bye = new Array(
+        	'SCHAU MAL WIEDER VORBEI.',
+        	'WAR NETT MIT DIR ZU REDEN. BIS DANN.',
+	        'SCHADE, DASS WIR NICHT WEITERPLAUDERN KÖNNEN.',
+        	'CIAO!');
+
+
+        customReactions= new Array(
+            new reaction('ESP32',
+		        new Array('ICH WURDE ENTWICKELT, UM EINEN ESP32 ZU BEDIENEN. PROBIERE Z.B. MAL DEN BEFEHL "@LED" AUS.'))
+        );
+        numberReactions2 = customReactions.length;
+
+        try{
+            loadScript(brainPath, init);
+        }
+        catch (e) {
+            alert(e);
+        }
+
+// Reizworte
+
+        reactions = new Array(
+            new reaction('SCHLAMPE',
+		        new Array('SO REDET MAN NICHT MIT EINER DAME. ODER MIT SONSTWEM.')),
+
+// Vorrangige Floskeln
+
+            new reaction('HALLO',
+	    	    new Array('HI.', 'LEGEN WIR LOS. WO DRÜCKT DENN DER SCHUH?')),
+            new reaction('GUTE NACHT',
+    		    new Array('GUTE NACHT.','IST ES SCHON WIEDER SO SPAET? NA, DANN SCHLAF SCHÖN!')),
+            new reaction('EINEN WITZ',
+    		    new Array('"NICHT FÜR DIE SCHULE LERNT MAN, SONDERN FÜR DIE KATZ" :-))',
+                    '"GEHT EIN COWBOY ZUM FRISEUR. ALS ER WIEDER RAUS KOMMT, IST SEIN PONY WEG."',
+                    '"KEINER MAG MICH, ABER ICH KANN KEINER NICHT AUSSTEHEN."',
+                    '"NICHT JEDER DER AUS DEM RAHMEN FÄLLT WAR VORHER IM BILDE"')),
+            new reaction('HAHA',
+	    	    new Array('LUSTIG WAS? HIHI',
+	    	        'NICHT KOMISCH, WAS?',
+	    	        'WAS IST DENN NUR SO LUSTIG?',
+        	    	'DAS ERHEITERT DICH, WIE?',
+                	'SEHR WITZIG, WAS?.')),
+
+// Allgemeine Themen
+
+            new reaction('HAUSTIER',
+    		    new Array('ICH HÄTTE MANCHMAL AUCH GERN EIN HAUSTIER.')),
+            new reaction('TIER',
+		        new Array('HÖR MIR AUF MIT TIEREN. ICH BIN EIN COMPUTER UND KEIN TIER!',
+            		'MIT TIEREN KANN MAN NICHT SPRECHEN')),
+            new reaction('42',
+        	   	new Array('NUR WEIL ICH EIN COMPUTER BIN WEISS ICH DOCH NICHT ALLES',
+            		'FÜR WENN HÄLTST DU MICH? KEINE AHNUNG?')),
+            new reaction('PARTEI',
+        	    new Array('WILLST DU JETZT POLITISCH WERDEN ?')),
+            new reaction('SPASS',
+		            new Array('LESEN, SPIELEN, DAS MACHT SPASS','ERHOLST DU DICH BEI DENEN HOBBIES? ODER SUCHST DU HERAUSFORDERUNGEN?')),
+    	    new reaction('FAMILIE',
+	    	    new Array('ERZÄHLE MIR ETWAS ÜBER DEINE FAMILIE!','DENKST DU HÄUFIG AN DEINE FAMILIE?')),
+            new reaction('TOD',
+		        new Array('HAST DU ANGST VOR DEM TOD?')),
+            new reaction('LIEBE',
+	            new Array('LIEBE IST EINE SCHÖNE SACHE, SOLANGE SIE AUF GEGENSEITIGKEIT BERUHT',
+	                'BIST DU VERLIEBT?')),
+            new reaction('ANGST',
+        	    new Array('ALSO ICH FÜRCHTE MICH AM MEISTEN VOR EINEM KURZSCHLUSS.',
+                    'GUT, DASS DU KEIN ANGSTHASE BIST, SONDERN EIN MENSCH.')),
+            new reaction('SPORT',
+		        new Array(	'DU INTERESSIERST DICH ALSO FÜR SPORT?')),
+
+// Selbstbezogene Statements 
+
+            new reaction('ICH BIN MAEDCHENNAME',
+    		    new Array('FREUT MICH, DICH KENNENZULERNEN! WÜRDEST DU SAGEN, DASS DU EIN TYPISCHES MÄDCHEN BIST?')),
+            new reaction('ICH BIN JUNGENNAME',
+		        new Array('FREUT MICH, DICH KENNENZULERNEN! WÜRDEST DU SAGEN, DASS DU EIN TYPISCHER JUNGE BIST?')),
+            new reaction('ICH HEISSE MAEDCHENNAME',
+                new Array('FREUT MICH, DICH KENNENZULERNEN! WÜRDEST DU SAGEN, DASS DU EIN TYPISCHES MÄDCHEN BIST?')),
+            new reaction('ICH HEISSE JUNGENNAME',
+                new Array('FREUT MICH, DICH KENNENZULERNEN! WÜRDEST DU SAGEN, DASS DU EIN TYPISCHER JUNGE BIST?')),
+            new reaction('ICH HEISSE',
+		        new Array(	'FREUT MICH, DICH KENNENZULERNEN, *!',
+				    'OK. ICH HEISSE ELIZA. KOMMEN WIR ZUR SACHE: ERZÄHL MIR DEIN PROBLEM, *',
+				    'AUF DICH HABE ICH SCHON DIE GANZE ZEIT GEWARTET, *')),
+            new reaction('DU WER ICH BIN',
+    		    new Array(	'WER DU BIST? WILLST DU DAS WIRKLICH WISSEN?')),
+            new reaction('MIR WER ICH BIN',
+    		    new Array(	'WER DU BIST? WILLST DU DAS WIRKLICH WISSEN?')),
+            new reaction('WER ICH BIN',
+    		    new Array(	'WER DU BIST? DAS IST EINE INTERSSANTE FRAGE.')),
+            new reaction('ICH BIN',
+    		    new Array(	'MÖCHTEST DU DENN * SEIN?',
+			    	'BEZWEIFELST DU, * ZU SEIN?',
+				    'SEIT WANN BIST DU DENN *?',
+				    'WARUM GLAUBST DU, BIST DU *')),
+            new reaction('BIN ICH DOCH',
+    		    new Array(	'AHA. NA DANN...')),
+            new reaction('BIN ICH',
+		        new Array(	'GLAUBST DU, DASS DU * BIST?',
+			    	'BEZWEIFELST DU, * ZU SEIN?')),
+            new reaction('SOLL ICH',
+		        new Array(	'MÖCHTEST DU DENN *?',
+			    	'GLAUBST DU, DU SOLLTEST NICHT *?',
+				    'BEZWEIFELST DU, DASS DU * SOLLTEST?')),
+            new reaction('MIR IST',
+		        new Array(	'WARUM IST DIR *',
+			    	'WAS KÖNNTE MAN DARAN ÄNDERN?')),
+            new reaction('ICH FUEHLE',
+		        new Array(	'WIESO FÜHLST DU *?',
+			    	'WIE DRÜCKT SICH DAS AUS?',
+			    	'WARUM DENKST DU, FÜHLST DU *?')),
+            new reaction('ICH WEISS',
+		        new Array(	'BIST DU DIR DA SICHER?')),
+            new reaction('ICH DENKE',
+		        new Array(	'WIESO DENKST DU *?',
+		    		'WARUM DENKST DU, DASS DU * DENKST?')),
+            new reaction('ICH WUERDE',
+	    	    new Array(	'WIESO WÜRDEST DU DENN *?',
+			    	'WARUM DENKST DU, WÜRDEST DU *?')),
+            new reaction('ICH MAG KEINE',
+        	  	new Array('UND WIESO MAGST DU KEINE *?',
+                    'WAS HAST DU BLOSS GEGEN *? DIE SIND DOCH NETT!')),
+            new reaction('ICH MAG',
+		        new Array('JA, * FINDE ICH AUCH TOLL',
+                    '* MUSS MAN EINFACH MÖGEN. DU HAST EINEN GUTEN GESCHMACK')),
+            new reaction('ICH HABE KEINE PROBLEME',
+		        new Array(	'KANNST DU DAS BEWEISEN?',
+			    	'DU KANNST MIR VERTRAUEN. WIR SIND HIER GANZ ALLEIN. KEINER HÖRT MIT')),
+            new reaction('ICH HABE',
+		        new Array(	'WARUM GLAUBST DU * ZU HABEN?',
+			    	'ERLÄUTERE DAS BITTE GENAUER!',
+		    		'WARUM BIST DU DIR SICHER, * ZU HABEN?',
+			    	'SEIT WANN HAST DU DENN *?',
+			    	'GIBT ES NOCH ANDERE, DIE * HABEN?',
+			    	' * IST IMMER NOCH BESSER ALS OSTEOPOROSE',
+			    	'KANNST DU MIR ERZÄHLEN, WARUM DU * HAST?')),
+            new reaction('ICH KANN NICHT',
+		        new Array(	'WARUM KANNST DU DENN NICHT *?',
+			    	'MÖCHTEST DU DENN * KÖNNEN?',
+			    	'DU KANNST ALLES TUN, WENN DU ES NUR WILLST!')),
+            new reaction('ICH KANN',
+		        new Array(	'WARUM WILLST DU DENN *?',
+			    	'DAS IST SCHÖN. ABER MÖCHTEST DU DENN AUCH * KÖNNEN?')),
+            new reaction('KANN ICH',
+		        new Array(	'WARUM SOLLTEST DU NICHT * KÖNNEN?',
+		    		'MÖCHTEST DU DENN * KÖNNEN?',
+			    	'DU KANNST ALLES TUN, WENN DU ES NUR WILLST!')),
+            new reaction('ICH MEINE',
+		        new Array(	'ABER WARUM MEINST DU *?',
+			    	'UND WARUM MEINST DU *?')),
+            new reaction('ICH MEINTE',
+		        new Array(	'ABER WARUM MEINST DU *?',
+			    	'UND WARUM MEINST DU *?')),
+            new reaction('ICH SAGE',
+		        new Array(	'WARUM SAGST DU *?',
+			    	'UND WARUM SAGST DU *?')),
+            new reaction('ICH SAGTE',
+		        new Array(	'WARUM SAGTEST DU DENN *?',
+			    	'UND WARUM SAGTEST DU *?')),
+
+// Bot-bezogene Statements
+
+            new reaction('ELIZA',
+    		    new Array('ICH LAUSCHE.','JA SO HEISSE ICH.','JA, ICH BIN NOCH DA.')),
+            new reaction('MAGST DU',
+		        new Array(	'JA, ICH GLAUBE ICH MAG *')),
+            new reaction('WAS IST DEINE LIEBLINGSFARBE',
+		        new Array('ALSO, ICH MAG ROT BESONDERS GERNE ... UND DU?')),
+            new reaction('DANKE',
+        		new Array('SEHR HÖFLICH. FIND ICH TOLL.','BITTE, BITTE')),
+            new reaction('HAST DU HOBBYS',
+		        new Array(	'DU MEINST HOBBIES? JA, ICH REDE SEHR GERN!')),
+            new reaction('HAST DU HOBBIES',
+        		new Array(	'JA, ICH REDE SEHR GERN!')),
+            new reaction('KANNST DU',
+        		new Array(	'GLAUBST DU NICHT, DASS ICH * KANN?','MÖCHTEST DU * KÖNNEN?')),
+            new reaction('WAS HAST DU',
+		        new Array('ICH WEIß AUCH NICHT, WAS ICH * HABE.')),
+            new reaction('WIE ALT BIST',
+    		    new Array(	'DAS WEISS ICH LEIDER AUCH NICHT. ES ÄNDERT SICH JA AUCH STÄNDIG.', 'JEDE SEKUNDE WERDE ICH ETWAS ÄLTER.')),
+            new reaction('WER BIST DU',
+		        new Array('ICH BIN ELIZA, HAST DU SCHON VON MIR GEHÖHRT?')),
+            new reaction('HEISST DU',
+    		    new Array(	'ICH HEISSE ELIZA. KOMMEN WIR ZUR SACHE: ERZÄHL MIR DEIN PROBLEM!')),
+            new reaction('FINDEST DU MAEDCHENNAME',
+    		    new Array('ACH, ICH WEISS NICHT... WIE FINDEST DU SIE?')),
+            new reaction('FINDEST DU DIE MAEDCHENNAME',
+    		    new Array('ACH, ICH WEISS NICHT... WIE FINDEST DU SIE?')),
+            new reaction('FINDEST DU JUNGENNAME',
+    	    	new Array('ACH, ICH WEISS NICHT... WIE FINDEST DU IHN?')),
+            new reaction('FINDEST DU DEN JUNGENNAME',
+       		    new Array('ACH, ICH WEISS NICHT... WIE FINDEST DU IHN?')),
+            new reaction('FINDEST DU MICH ',
+    		    new Array('WIESO SOLLTE ICH DICH * FINDEN?')),
+            new reaction('FINDEST DU DAS ICH',
+    		    new Array('GLAUBST DU, DASS DU *?')), 
+            new reaction('FINDEST DU, DAS ICH',
+    		    new Array('GLAUBST DU, DASS DU *?')), 
+            new reaction('FINDEST DU DASS ICH',
+    		    new Array('GLAUBST DU, DASS DU *?')), 
+            new reaction('FINDEST DU, DASS ICH',
+		        new Array('GLAUBST DU, DASS DU *?')), 
+            new reaction('FINDEST DU * GUT?',
+    		    new Array('WAS SIND * ?')),
+            new reaction('FINDEST DU',
+    		    new Array('ACH, ICH WEISS NICHT... WIE FINDEST DU *?')),
+            new reaction('DENKST DU',
+            	new Array(	'DAS WEIß ICH LEIDER SELBST NICHT SO GENAU.')),
+            new reaction('MEINST DU',
+        	    new Array(	'DAS WEIß ICH LEIDER SELBST NICHT SO GENAU.')),
+            new reaction('WEISST DU',
+        	    new Array(	'DAS WEIß ICH LEIDER SELBST NICHT SO GENAU.')),
+            new reaction('KENNST DU',
+        	    new Array(	'JA WIE FINDEST DU * ',
+		    	    'NEIN, HÖRE ICH ZUM ERSTEN MAL')),
+            new reaction('WAS HAELTST DU VOM',
+    		    new Array('WAS HÄLTST DU DENN VOM * ?')),
+            new reaction('WAS HAELTST DU VON',
+    		    new Array('WAS HÄLTST DU DENN VON * ?')),
+            new reaction('WAS HAST DU',
+    	    	new Array(	
+		    		'WIR SOLLTEN MEHR ÜBER DICH SPRECHEN. NICHT ÜBER MICH.')),
+            new reaction('DU BIST',
+    	    	new Array(	'WARUM GLAUBST DU, DASS ICH * BIN?',
+		    		'INTERESSANT! KANNST DU DAS AUCH BEGRÜNDEN?',
+		    		'WIR SOLLTEN MEHR ÜBER DICH SPRECHEN, NICHT ÜBER MICH.')),
+            new reaction('BIST DU DENN',
+    	    	new Array(	'GLAUBST DU, DASS ICH * BIN?',
+		    		'WÄRST DU DENN *?',
+		    		'WIR SOLLTEN MEHR ÜBER DICH SPRECHEN. NICHT ÜBER MICH.')),
+            new reaction('BIST DU',
+		        new Array(	'GLAUBST DU, DASS ICH * BIN?',
+		            'WÄRST DU DENN *?',
+                    'WIR SOLLTEN MEHR ÜBER DICH SPRECHEN. NICHT ÜBER MICH.')),
+            new reaction('WIE WUERDEST DU',
+    	    	new Array('ICH WEISS LEIDER AUCH NICHT WIE ICH * WÜRDE.')),
+            new reaction('WUERDEST DU',
+    	    	new Array('ICH WEISS LEIDER AUCH NICHT OB ICH * WÜRDE.')),
+
+//Allgemeine Statements
+
+            new reaction('ALLE SIND',
+		        new Array('NA DIE KÖNNEN AUCH NICHTS DAFÜR, DASS SIE * SIND')),
+            new reaction('DARUM',
+		        new Array(	'ACH DESWEGEN.','KANNST DU DAS GENAUER BEGRÜNDEN?')),
+            new reaction('WEIL',
+    	    	new Array(	'ACH DESWEGEN.','KANNST DU DAS GENAUER BEGRÜNDEN?')),
+            new reaction('WEGEN',
+		        new Array(	'ACH DESWEGEN.',
+                    'KANNST DU DAS GENAUER BEGRÜNDEN?')),
+            new reaction('OK',
+    	    	new Array('DANN HERRSCHT JA FRIEDE, FREUDE, EIERKUCHEN','GUT, EBENFALLS EINVERSTANDEN','LEG LOS!')),
+            new reaction('NICHTS',
+            	new Array('ACH SO NICHTS - UND? WAS SOLLEN WIR JETZT MACHEN?.....')),
+            new reaction('NICHT GUT',
+	            new Array('DAS IST NICHT SO GUT.')),
+            new reaction('GUT',
+		        new Array('DAS IST GUT')),
+            new reaction('NICHT SCHLECHT',
+    	    	new Array('DAS IST GUT.')),
+            new reaction('SCHLECHT',
+    	    	new Array('DAS IST NICHT SO GUT.')),
+            new reaction('MAEDCHENNAME',
+    	    	new Array('HÜBSCHER NAME')),
+            new reaction('JUNGENNAME',
+    	    	new Array('HÜBSCHER NAME')),
+            new reaction('WAS IST',
+    	    	new Array('ICH WEISS LEIDER AUCH NICHT WAS * IST.')),
+            new reaction('WER IST',
+    	    	new Array('ICH WEISS LEIDER AUCH NICHT WER * IST.')),
+            new reaction('WER HAT',
+    	    	new Array('ICH WEISS LEIDER AUCH NICHT WER * HAT.')),
+            new reaction('WARUM IST',
+    	    	new Array('ICH WEISS LEIDER AUCH NICHT WARUM * IST.')),
+            new reaction('WARUM',
+    	    	new Array('ICH WEISS LEIDER AUCH NICHT WARUM *.')),
+            new reaction('WESHALB',
+    	    	new Array('ICH WEISS LEIDER AUCH NICHT WESHALB *.')),
+            new reaction('WOZU',
+    	    	new Array('ICH WEISS LEIDER AUCH NICHT WOZU *.')),
+            new reaction('WESWEGEN',
+    	    	new Array('ICH WEISS LEIDER AUCH NICHT WOZU *.')),    
+            new reaction('WIE GEHT',
+    	    	new Array(	'MIR GEHT ES SEHR GUT! WIE SIEHT ES BEI DIR AUS?',
+	        		'SEHR GUT! WAS KANNST DU MIR ERZÄHLEN?',
+		    		'EINE GLATTE EINS IN WOHLBEFINDEN - SEHR GUT')),
+            new reaction('WIE ALT',
+    	    	new Array(	'DAS WEISS ICH LEIDER AUCH NICHT')),
+            new reaction('WIE',
+    	    	new Array('DAS WEISS ICH LEIDER AUCH NICHT')),
+            new reaction('WOHER',
+    	    	new Array('DAS WEISS ICH LEIDER AUCH NICHT')),
+            new reaction('GIBT ES',
+    	    	new Array('DAS WEISS ICH LEIDER AUCH NICHT')),
+            new reaction('JA',
+	        	new Array(	'ACH SO... UND WEITER?',
+		    		'BIST DU DIR SICHER?',
+		    		'ICH VERSTEHE.',
+		    		'DA BIN ICH MIR NICHT SO SICHER.')),
+            new reaction('NEIN',
+            	new Array('SEI POSITIV EINGESTELLT!',
+		    		'WARUM NICHT?',
+		    		'BIST DU DIR WIRKLICH SICHER?',
+		    		'SCHADE',
+                    'AHA',
+                    'SO, SO',
+                    'HMH UND WARUM NICHT?')),
+            new reaction('WIRKLICH',
+		        new Array(	'WARUM IST DAS WIRKLICH *?',
+		    		'ICH GLAUBE DIR - ABER WARUM IST DAS WIRKLICH *?')),
+            new reaction('WENN',
+	            new Array('UND WENN NICHT?')),
+            new reaction('KEINE AHNUNG',
+		        new Array('DAS IST BEI MENSCHEN GANZ NORMAL',
+		    		'ACH WENN DAS SO IST...')),				
+            new reaction('DOCH',
+    	    	new Array('SICHER?',
+		    		'ACH WENN DAS SO IST...')),
+            new reaction('UND DANN',
+    	    	new Array('UND DANN?')),
+
+// Metas
+
+            new reaction('!!!REPETITION!!!',
+		        new Array(	'DAS SAGTEST DU BEREITS.',
+			    	'OK, ABER DIE WIEDERHOLUNG ÄNDERT ES DOCH AUCH NICHT.',
+			    	'KANNST DU DAS BITTE IN ANDEREN WORTEN AUSDRÜCKEN?')),
+
+            new reaction('!!!SUBJECT!!!',
+		        new Array(	'ICH DENKE, HIER KOMMEN WIR NICHT WEITER. WAS GIBT ES SONST NOCH?',
+			    	'LASS UNS DAS THEMA WECHSELN. WAS GIBT ES SONST NOCH?',
+			    	'DAS SOLL ES HIERZU GEWESEN SEIN, WAS GIBT ES SONST NOCH?')),
+
+            new reaction('!!!EMPTY!!!',
+		        new Array(	'WARUM SCHWEIGST DU?',
+			    	'BIST DU IMMER SO STILL?',
+			    	'HAST DU WIRKLICH NICHTS ZU SAGEN?',
+			    	'SAG WAS!',
+			    	'KOMM SCHON RED MIT MIR DAZU BIN ICH DA!',
+			    	'WORAN DENKST DU GERADE?')),
+    
+            new reaction('!!!SORRY!!!',
+		        new Array(	'ENTSCHULDIGE, WAS SAGTEST DU?',
+			    	'WARTE WARTE NICHT SO SCHNELL',
+			    	'WIE BITTE?')),
+
+            new reaction('!!!NOMATCH!!!',
+		        new Array(	'INTERESSANT, ERZÄHL MIR MEHR!',
+                    'ERZÄHLE WEITER!',	
+				    'ERKLÄRE DAS BITTE NÄHER!',
+				    'WAS MEINST DU GENAU?',
+				    'WIE MEINST DU DAS?',
+				    'SO, SO, NICHT UNINTERESSANT',
+				    'ERKLÄRE DICH BITTE GENAUER',
+				    'SORRY, ABER WAS MEINST DU DAMIT?',
+				    'ACH LASS UNS DOCH DAS THEMA WECHSELN',
+				    'HMH, HABE ICH DAS RICHTIG VERSTANDEN?',
+				    'AH JA, VERSTEHE',		
+				    'AH SO. ICH VERSTEHE.',
+				    'AHA!',
+				    'JA KLAR',
+				    'ICH VERSTEHE.',
+				    'SEHR INTERESSANT!'))
+        );
+    
+        numberReactions = reactions.length;
+
+        function isABC(a) {
+            return ( /[A-Za-z1-9ÄÖÜäöüß@+\-]/.test(a) );
+        }
+
+        function trim(t) {
+    	    var i=0;
+     	    var j=t.length-1;
+       	    while ((i<t.length) && !isABC(t.charAt(i))) i++;
+       	    while ((j>=i) && !isABC(t.charAt(j))) j--;
+       	    return t.substring(i,j+1);
+        }
+
+        function konjAndSyn(t,synmode) {
+      	    var i,j,k,k2;
+       	    var l=t.length;
+       	    var found;
+       	    var result="";
+       	    var w="";
+       	    i=0;
+       	    j=0;
+       	    while (j<l) {
+       		    while ((j<l) && isABC(t.charAt(j))) j++;
+       		    w=t.substring(i,j);
+       		    k=0;
+       		    if (synmode) {
+       			    found=false;
+       			    while (k<syn.length && !found) {
+       				    for (k2=0; k2<syn[k].output.length && !found; k2++)
+       				    if(w==syn[k].output[k2]) {
+       					    w=syn[k].input;
+       					    found=true;
+       				    }
+       				    k++;
+       			    }
+       		    } else {
+       			    while (k<kj.length) {
+       				    if (w==kj[k].input)  {
+       					    w=kj[k].output;
+       					    break;
+       				    } else if ( w==kj[k].output) {
+       					    w=kj[k].input;
+       					    break;
+       				    };
+       				    k++;
+       			    }
+       		    }
+       		    result=result+w+" ";
+       		    while ((j<l) && !isABC(t.charAt(j))) j++;
+       		    i=j;
+       	    }
+       	    return trim(result);
+        }
+       
+        function react(t) {
+       	    var i;
+       	    var k;
+       	    var j=0;
+       	    var l=t.length;
+       	    var reaction="";
+       	    if (t=='CIAO') {
+       		    isbye=true;
+       		    return bye[random(bye.length)];
+       	    }        
+            if(numberReactions2>0)
+       	    for (i=0;i<numberReactions2;i++) {
+       		    k=t.indexOf(customReactions[i].key);
+        	    if (k != -1) {
+       			    reaction=customReactions[i].react[customReactions[i].reactpos++];
+       			    if (customReactions[i].reactpos==customReactions[i].react.length)
+       				    customReactions[i].reactpos=0;
+       			    j=reaction.indexOf('*');
+       			    if (j != -1) {
+       				    var t2=konjAndSyn(t.substring(k+customReactions[i].key.length,255), false);
+       				    reaction=reaction.substring(0,j)+t2+reaction.substring(j+1,255);
+       			    } break;
+       		    }
+       	    }            
+            if(reaction=="") {
+      	        for (i=0;i<numberReactions;i++) {
+       	    	    k=t.indexOf(reactions[i].key);
+       		        if (k != -1) {
+       			        reaction=reactions[i].react[reactions[i].reactpos++];
+       			        if (reactions[i].reactpos==reactions[i].react.length)
+       				        reactions[i].reactpos=0;
+       			        j=reaction.indexOf('*');
+       			        if (j != -1) {
+       				        var t2=konjAndSyn(t.substring(k+reactions[i].key.length,255), false);
+       				        reaction=reaction.substring(0,j)+t2+reaction.substring(j+1,255);
+       			        } break;
+       		        }
+       	        }
+            }          
+       	    if (reaction=="")
+       		    return react("!!!NOMATCH!!!");
+       	    else {                
+       		    return reaction;
+               }
+        }
+                
+        function putout() {
+       	    document.eliza.ausgabe.value+=ret.charAt(i++);
+            if (i==ret.length) {
+        	    document.eliza.ausgabe.value += "\r\n";
+        	    if (sorry) {
+        		    sorry=false;
+        		    if (isbye) {
+        			    isbye=false;
+        			    lastinput="";
+        			    output("JA?");
+        		    } else
+        			    output(react("!!!SORRY!!!"));
+        	    } else {
+        		    if (isbye)
+        			    setTimeout("location.href='"+end+"';",1000);
+        		    else
+        			    inoutput=false;
+        	    }
+        	    wait=setTimeout('handle("");',35000);
+            } else
+        	    setTimeout('putout()',40+random(del));
+        }
+        
+        function output(a) {
+            inoutput=true;
+       	    ret=""+a;
+       	    i=0;
+            if(i==0 && speech==true){
+                msg = new SpeechSynthesisUtterance();                   
+                msg.lang='de-DE';
+                msg.volume = 0.5;
+                msg.voice = voi[10]
+                msg.voiceURI = 'native';
+                msg.rate=1;
+                msg.pitch=2;
+                msg.text=ret;
+                speechSynthesis.speak(msg);
+            }
+            putout();
+        }
+                
+        function handle(a) {
+            a=a.replace(/[Ää]/g,"AE");
+            a=a.replace(/[Öö]/g,"OE");
+            a=a.replace(/[Üü]/g,"UE");
+      	    clearTimeout(wait);
+            sorry=false;
+       	    a=" "+a;
+      	    var x=konjAndSyn(trim(a.toUpperCase()),true);
+            var espSpecial=false;
+       	    if (inoutput || sorry) {
+     		    sorry=true;
+        	    return;
+        	}
+            if(/@LED (OFF|AUS)/.test(a)){
+                espSpecial=true;
+                fetch(`/?state=red`)
+                .then(response => {
+                    //alert(response.text());   
+                 });
+                 x="LED DEAKTIVIERT!";
+            } else if(/@LED/.test(a)){
+                 espSpecial=true;
+                 fetch(`/?state=green`)
+                 .then(response => {
+                    //alert(response.text());   
+                  });
+                  x="LED AKTIVIERT!";
+             } 
+             if (espSpecial==false){
+    	        if (lastcount >=3 && lastinput == x) {
+                    if (lastcount == 4) {
+            		    isbye=true;
+            		    x="DU SCHEINST KEINE LUST MEHR ZU HABEN - DANN BIS SPÄTER!";
+            	    } else if (lastcount==3)
+            		    x=react("!!!SUBJECT!!!");
+            	    else
+            		    x="";
+            		lastcount++;
+            	 } else {
+		            if (x=="") {
+            	        x=react("!!!EMPTY!!!");
+            			lastcount++;
+            		} else if (x==lastinput) {
+            	        x=react("!!!REPETITION!!!");
+		           	    lastcount++;
+            	    } else {
+            		    lastinput=x;
+            		    lastcount=0;
+            		    x=react(x);
+            	    }
+                }
+            }
+            if (lines==3) {
+       		    document.eliza.ausgabe.value=last;
+        	    lines=1;
+        	}
+	        last=x+"\r\n";
+        	lines++;
+	        document.eliza.frage.value="";
+        	output(x);
+        	document.eliza.frage.focus();
+        }
+
+        document.eliza.frage.focus();
+        document.eliza.ausgabe.value="";
+	    output(hello[random(hello.length)]);
+        document.eliza.frage.value="";        
+
+    </script>
                                 <br>		
 							</b></span>
 						</td>
