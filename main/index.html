@@ -27,7 +27,7 @@
     <script name="Focus">
 
         var end = 'index.html';      
-        var brainPath = 'file:///home/af/.brain.js';
+        //var brainPath = 'file:///home/af/.brain.js';
         var del = 50;
         var last="";
         var lines=1;
@@ -59,6 +59,7 @@
         msg.rate=1;
         msg.pitch=2;
 
+	/*
         function loadScript(url, callback)
         {
                 var head = document.head;
@@ -69,7 +70,8 @@
                 script.onload = callback;
                 head.appendChild(script);
         }
-
+	*/
+	    
         function random(a) {
 	        return (new Date()).getTime() % a;
         }
@@ -159,13 +161,15 @@
         );
         numberReactions2 = customReactions.length;
 
+	/*
         try{
             loadScript(brainPath, init);
         }
         catch (e) {
             alert(e);
         }
-
+	*/
+	    
 // Reizworte
 
         reactions = new Array(
